@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     input[strcspn(input, "\n")] = '\0';
     if (!strncmp(input, "exit", 4)) return 0;
     else if (!strncmp(input, "echo", 4)) {
-      printf("%s\n", input+4);      
+      printf("%s\n", input+5);      
     }
     else{
       printf("%s: command not found\n", input);
