@@ -26,6 +26,6 @@ int main(int argc, char *argv[]){
 		command[j] = '\0';
 		//printf("%s\n", command);
 		int ind = search_cmd(command);
-		(ind == -1) ? printf("command not found\n") : commands[ind].func(inp_ptr, (int)strnlen(inp_ptr, sizeof(input)));
+		(ind == -1) ? printf("%s: command not found\n", command) : commands[ind].func(inp_ptr, (int)strnlen(inp_ptr, sizeof(input)));
 	}
 }
