@@ -16,12 +16,6 @@ void echo(char *argv, int len);
 void type(char *argv, int len);
 void redirect_stdout(char *argv, int len);
 
-builtin_command commands[CMD_CNT] = {
-	{&(echo), "echo"},
-	{&(exit_shell),"exit"},
-	{&(redirect_stdout), ">"},
-	{&(type), "type"}
-	
-};
+extern builtin_command commands[CMD_CNT];
 
 #endif

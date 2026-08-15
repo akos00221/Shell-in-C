@@ -3,7 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+builtin_command commands[CMD_CNT] = {
+	{&(echo), "echo"},
+	{&(exit_shell),"exit"},
+	{&(redirect_stdout), ">"},
+	{&(type), "type"}
+	
+};
 
 int search_cmd(char *key){
 	int high = CMD_CNT - 1;
