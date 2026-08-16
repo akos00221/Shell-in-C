@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 const builtin_command commands[CMD_CNT] = {
 	{&(echo), "echo"},
@@ -96,9 +97,22 @@ int launch_exec(char **argv, int len){
 	if (full_path == NULL){
 		return -1;
 	}
-	fork();
-	execv(full_path, argv);
-	return 0;
+	pid_t id = fork();
+	if (id > 0){
+		execv(full_path, argv);
+		return 0;
+	}
+	else if (id == 0){
+		int status;
+        waitpid(id, &status, 0); 
+		free(full_path);
+		return 0;
+	}
+	else{
+		free(argv);
+		free(full_path);
+		printf("bruh");
+	}
 }
 
 void redirect_stdout(char **argv, int len){}
