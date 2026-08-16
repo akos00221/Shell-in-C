@@ -16,6 +16,6 @@ void echo(char *argv, int len);
 void type(char *argv, int len);
 void redirect_stdout(char *argv, int len);
 
-extern builtin_command commands[CMD_CNT];
+extern const builtin_command commands[CMD_CNT];
 
 #endif
