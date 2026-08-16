@@ -100,7 +100,9 @@ int launch_exec(char **argv, int len){
 	
 	pid_t id = fork();
 	if (id > 0){
+		printf("\n");
 		execv(full_path, argv);
+		
 		return 0;
 	}
 	else if (id == 0){
