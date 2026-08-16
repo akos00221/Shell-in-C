@@ -52,9 +52,7 @@ int main(int argc, char *argv[]){
 			if (launch_exec(input_tok, input_tok_len) == -1){
 				printf("%s: not found\n", input_tok[0]);
 			}
-			else{
-				//printf("Program was passed %d args (including program name).\n", input_tok_len);
-			}
+
 		}
 		else{
 			commands[ind].func(input_tok, input_tok_len);
