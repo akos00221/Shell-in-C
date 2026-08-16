@@ -26,13 +26,15 @@ int search_cmd(char *key){
 	return -1;
 }
 
-void exit_shell(char *argv, int len){
+void exit_shell(char **argv, int len){
+	free(argv);
 	exit(EXIT_SUCCESS);
 }
-void echo(char *argv, int len){
-	char *input = argv;
-	char *builtin_function_parameter = input+5;
-	printf("%s\n", builtin_function_parameter);
+void echo(char **argv, int len){
+	for (int i = 1; i < len; ++i){
+		printf("%s ", argv[i]);
+	}
+	printf("\n");
 }
 
 static char *search_exec(char *argv, int len){
@@ -70,27 +72,38 @@ static char *search_exec(char *argv, int len){
 	return NULL;
 }
 
-void type(char *argv, int len){
-	char *input = argv;
-    char *builtin_function_parameter = input+5;
-	int ind = search_cmd(builtin_function_parameter);
+void type(char **argv, int len){
+
+	int ind = search_cmd(argv[0]);
 	if (ind == -1) {
-		char *full_path = search_exec(builtin_function_parameter, strlen(builtin_function_parameter));
+		char *full_path = search_exec(argv[0], strlen(argv[0]));
 		if (full_path != NULL) {
-			printf("%s is %s\n", builtin_function_parameter, full_path);
+			printf("%s is %s\n", argv[0], full_path);
 			free(full_path);
 		}
 		else {
-			printf("%s: not found\n", builtin_function_parameter);
+			printf("%s: not found\n", argv[0]);
 		}
 		
 	}
 	else {
-		printf("%s is a shell builtin\n", builtin_function_parameter);
+		printf("%s is a shell builtin\n", argv[0]);
 	}
 		
 }
-void redirect_stdout(char *argv, int len){}
+int launch_exec(char **argv, int len){
+	char *full_path = search_exec(argv[0], strlen(argv[0]));
+	if (full_path == NULL){
+		return -1;
+	}
+	fork();
+	execv(full_path, argv);
+	return 0;
+}
+
+void redirect_stdout(char **argv, int len){}
+
+
 
 /*
 		DIR *dir = opendir(token);
