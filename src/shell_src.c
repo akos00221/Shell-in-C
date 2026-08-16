@@ -75,7 +75,7 @@ void type(char *argv, int len){
     char *builtin_function_parameter = input+5;
 	int ind = search_cmd(builtin_function_parameter);
 	if (ind == -1) {
-		char *full_path = search_exec(builtin_function_parameter, len);
+		char *full_path = search_exec(builtin_function_parameter, strlen(builtin_function_parameter));
 		if (full_path != NULL) {
 			printf("%s is %s\n", builtin_function_parameter, full_path);
 			free(full_path);
