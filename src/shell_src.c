@@ -58,7 +58,7 @@ static char *search_exec(char *argv, int len){
 			return NULL;
 		}
 		sprintf(full_path, "%s/%s", token, argv);
-		printf("%s\n", full_path);
+		//printf("%s\n", full_path);
 		if (!access(full_path, X_OK)){
 			free(env_cpy);
 			return full_path;
