@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 				printf("%s: not found\n", input_tok[0]);
 			}
 			else{
-				printf("Program was passed %d args (including program name).\n", input_tok_len);
+				//printf("Program was passed %d args (including program name).\n", input_tok_len);
 			}
 		}
 		else{
