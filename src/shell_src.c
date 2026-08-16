@@ -58,11 +58,12 @@ static char *search_exec(char *argv, int len){
 			return NULL;
 		}
 		sprintf(full_path, "%s/%s", token, argv);
+		printf("%s\n", full_path);
 		if (!access(full_path, X_OK)){
 			free(env_cpy);
 			return full_path;
 		}
-		free(full_path);
+		//free(full_path);
 		token = strtok_r(NULL, ":", &saveptr);
 	}
 	free(env_cpy);
@@ -74,7 +75,7 @@ void type(char *argv, int len){
     char *builtin_function_parameter = input+5;
 	int ind = search_cmd(builtin_function_parameter);
 	if (ind == -1) {
-		char *full_path = search_exec(argv, len);
+		char *full_path = search_exec(builtin_function_parameter, len);
 		if (full_path != NULL) {
 			printf("%s is %s\n", builtin_function_parameter, full_path);
 			free(full_path);
