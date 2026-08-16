@@ -35,30 +35,59 @@ void echo(char *argv, int len){
 	printf("%s\n", builtin_function_parameter);
 }
 
-static int search_exec(char *argv, int len){
+static char *search_exec(char *argv, int len){
     const char *env = getenv("PATH");
-	char env_cpy[strlen(env) + 1];
-	strcpy(env_cpy, env);
+	if (env == NULL){
+		fprintf(stderr, "No path variables.\n");
+		return NULL;
+	}
+	char *env_cpy = strdup(env);
+	if (env_cpy == NULL){
+		fprintf(stderr, "Memory allocation failed.\n");
+		return NULL;
+	}
+	
 	char *token, *saveptr;
 	token = strtok_r(env_cpy, ":", &saveptr);
 	
 	while (token != NULL){
-		char full_path[strlen(token)+len];
-		strcpy(full_path, token);
-		strcat(full_path, argv);
-		if (!access(full_path, X_OK)){
-			return 0;
+		int token_len = strlen(token);
+		char *full_path = malloc(token_len+len+2);
+		if (full_path == NULL){
+			fprintf(stderr, "Memory allocation error.\n");
+			return NULL;
 		}
+		sprintf(full_path, "%s/%s", token, argv);
+		if (!access(full_path, X_OK)){
+			free(env_cpy);
+			return full_path;
+		}
+		free(full_path);
 		token = strtok_r(NULL, ":", &saveptr);
 	}
-	return 1;
+	free(env_cpy);
+	return NULL;
 }
 
 void type(char *argv, int len){
 	char *input = argv;
     char *builtin_function_parameter = input+5;
 	int ind = search_cmd(builtin_function_parameter);
-	(ind == -1) ? printf("%s: not found\n", builtin_function_parameter) : printf("%s is a shell builtin\n", builtin_function_parameter);
+	if (ind == -1) {
+		char *full_path = search_exec(argv, len);
+		if (full_path != NULL) {
+			printf("%s is %s\n", builtin_function_parameter, full_path);
+			free(full_path);
+		}
+		else {
+			printf("%s: not found\n", builtin_function_parameter);
+		}
+		
+	}
+	else {
+		printf("%s is a shell builtin\n", builtin_function_parameter);
+	}
+		
 }
 void redirect_stdout(char *argv, int len){}
 
