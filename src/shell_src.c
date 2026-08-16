@@ -97,8 +97,7 @@ int launch_exec(char **argv, int len){
 	if (full_path == NULL){
 		return -1;
 	}
-	execv(full_path, argv);
-	/*
+	
 	pid_t id = fork();
 	if (id > 0){
 		execv(full_path, argv);
@@ -115,7 +114,7 @@ int launch_exec(char **argv, int len){
 		free(full_path);
 		printf("bruh");
 	}
-		*/
+		
 }
 
 void redirect_stdout(char **argv, int len){}
