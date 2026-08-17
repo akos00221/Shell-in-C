@@ -100,13 +100,13 @@ int launch_exec(char **argv, int len){
 	
 	pid_t id = fork();
 	if (id > 0){
-		execv(full_path, argv);		
-	}
-	else if (id == 0){
 		int status;
         waitpid(id, &status, 0); 
 		free(full_path);
 		return 0;
+	}
+	else if (id == 0){
+		execv(full_path, argv);		
 	}
 	else{
 		free(argv);
