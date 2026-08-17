@@ -75,20 +75,20 @@ static char *search_exec(char *argv, int len){
 
 void type(char **argv, int len){
 
-	int ind = search_cmd(argv[0]);
+	int ind = search_cmd(argv[1]);
 	if (ind == -1) {
-		char *full_path = search_exec(argv[0], strlen(argv[0]));
+		char *full_path = search_exec(argv[1], strlen(argv[1]));
 		if (full_path != NULL) {
-			printf("%s is %s\n", argv[0], full_path);
+			printf("%s is %s\n", argv[1], full_path);
 			free(full_path);
 		}
 		else {
-			printf("%s: not found\n", argv[0]);
+			printf("%s: not found\n", argv[1]);
 		}
 		
 	}
 	else {
-		printf("%s is a shell builtin\n", argv[0]);
+		printf("%s is a shell builtin\n", argv[1]);
 	}
 		
 }
