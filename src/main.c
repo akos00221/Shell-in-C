@@ -54,7 +54,9 @@ int main(int argc, char *argv[]){
 		if (input_tok_len < params){
 			input_tok[input_tok_len] = NULL;
 		}
-
+        //for (int i = 0; i < input_tok_len; ++i){
+        //    printf("%s %d\n", input_tok[i], strlen(input_tok[i]));
+        //}
 		//printf("%s\n", command);
 		int ind = search_cmd(input_tok[0]);
 		if (ind == -1){

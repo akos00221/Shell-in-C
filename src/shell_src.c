@@ -186,11 +186,14 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 		
 		j++;
 	}
-	token_builder[token_builder_len] = '\0';
-	input_tok[(*len)] = strdup(token_builder);
-	token_builder_len = 0;
-	memset(token_builder, 0, INPUT_BUFFER_SIZE);
-	(*len)++;
+	if (token_builder_len > 0){
+		token_builder[token_builder_len] = '\0';
+		input_tok[(*len)] = strdup(token_builder);
+		token_builder_len = 0;
+		memset(token_builder, 0, INPUT_BUFFER_SIZE);
+		(*len)++;
+	}
+
 }
 void redirect_stdout(char **argv, int len){}
 
