@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 const builtin_command commands[CMD_CNT] = {
 	{&(echo), "echo"},
@@ -115,7 +116,78 @@ int launch_exec(char **argv, int len){
 	}
 		
 }
+void parse_input(char *input, char **input_tok, int *size, int *len){
+	char c;
+	char token_builder[INPUT_BUFFER_SIZE];
+	parse_states state = NORMAL;
+	int j = 0, token_builder_len = 0;
+	*len = 0;
+	while ((c = input[j]) && c != '\0'){
+		
+		switch (state){
+			case NORMAL:
+				if (isspace(c)){
+					if (token_builder_len != 0){
+						token_builder[token_builder_len] = '\0';
+						if (*len >= *size){
+							//realloc
+						}
+						input_tok[*len] = strdup(token_builder);
+						//printf("%s\n", input_tok[*len]);
+						token_builder_len = 0;
+						memset(token_builder, 0, INPUT_BUFFER_SIZE);
+						(*len)++;
+					}
+				}
+				else if (c == '\''){
+					state = SINGLE_QUOTE;
+				}
+				else if (c == '\"'){
+					state = DOUBLE_QUOTE;
+				}
+				else{
+					token_builder[token_builder_len] = c;
+					token_builder_len++;
+				}
+				break;
+			case SINGLE_QUOTE:
+				//printf("%c\n", c);
+				if (c == '\''){
+					//printf("%d\n", token_builder_len);
+					if (input[j+1] == '\'' || input[j-1] == '\''){
+						state = NORMAL;
+					}
+					//printf("%c %c\n", input[j], input[j+1]);
+					else {
+						token_builder[token_builder_len] = '\0';
+						if (*len >= *size){
+							//realloc
+						}
+						input_tok[(*len)] = strdup(token_builder);
+						token_builder_len = 0;
+						memset(token_builder, 0, INPUT_BUFFER_SIZE);
+						(*len)++;
+						state = NORMAL;
+					}
 
+
+				}
+				else{
+					token_builder[token_builder_len] = c;
+					token_builder_len++;
+				}
+				break;
+			case DOUBLE_QUOTE:
+				break;
+		}
+		
+		j++;
+	}
+	input_tok[(*len)] = strdup(token_builder);
+	token_builder_len = 0;
+	memset(token_builder, 0, INPUT_BUFFER_SIZE);
+	(*len)++;
+}
 void redirect_stdout(char **argv, int len){}
 
 

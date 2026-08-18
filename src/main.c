@@ -13,16 +13,22 @@ int main(int argc, char *argv[]){
 		    printf("Memory allocation error.\n");
 		    return 1;
 		}
-		fgets(input, INPUT_BUFFER_SIZE, stdin);
+		fgets(input, INPUT_BUFFER_SIZE-1, stdin);
 		input[strcspn(input, "\n")] = '\0';
 
 		int params = 4;
-		char *input_ptr, *token;
-		int j = 0, input_tok_len = 0;
+		//char *input_ptr, *token;
+		//int j = 0;
+		int input_tok_len = 0;
 		char **input_tok = malloc(params*sizeof(char*));
 		if (input_tok == NULL){
 			return 1;
 		}
+		parse_input(input, input_tok, &params, &input_tok_len);
+		
+		// 
+
+		/*
 		token = strtok_r(input, " ", &input_ptr);
 		j++;
 		input_tok[0] = token;
@@ -42,6 +48,7 @@ int main(int argc, char *argv[]){
 				params *= 2;
 			}
 		}
+			*/
 		if (input_tok_len < params){
 			input_tok[input_tok_len] = NULL;
 		}
@@ -57,6 +64,7 @@ int main(int argc, char *argv[]){
 		else{
 			commands[ind].func(input_tok, input_tok_len);
 		}
+
 		//(ind == -1) ? printf("%s: command not found\n", input_tok[0]) : commands[ind].func(input_tok, input_tok_len);
 		
 	}
