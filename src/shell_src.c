@@ -8,6 +8,8 @@
 #include <sys/wait.h>
 #include <ctype.h>
 
+const char double_quotes_escape_chars[ESCAPE_CHARS_LEN] = {'\\','\"','$','`'};
+
 const builtin_command commands[CMD_CNT] = {
 	{&(echo), "echo"},
 	{&(exit_shell),"exit"},
@@ -166,7 +168,7 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 						mode = OFF;
 					break;
 				}
-				break;
+			break;
 			case SINGLE_QUOTE:
 				if (c == '\''){
 					if (input[j+1] == '\'' || input[j-1] == '\''){
@@ -188,29 +190,50 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 					token_builder[token_builder_len] = c;
 					token_builder_len++;
 				}
-				break;
+			break;
 			case DOUBLE_QUOTE:
-				if (c == '\"'){
-					if (input[j+1] == '\"' || input[j-1] == '\"' || !isspace(input[j+1])){
-						state = NORMAL;
-					}
-					else {
-						token_builder[token_builder_len] = '\0';
-						if (*len >= *size){
-							//realloc
+				switch (mode){
+					case ON:
+						for (int i = 0; i < ESCAPE_CHARS_LEN; ++i){
+							if (c == double_quotes_escape_chars[i]){
+								token_builder[token_builder_len] = c;
+								token_builder_len++;
+								break;
+							}
 						}
-						input_tok[(*len)] = strdup(token_builder);
-						token_builder_len = 0;
-						memset(token_builder, 0, INPUT_BUFFER_SIZE);
-						(*len)++;
-						state = NORMAL;
-					}
+
+						mode = OFF;
+					break;
+					case OFF:
+						if (c == '\"'){
+							if (input[j+1] == '\"' || input[j-1] == '\"' || !isspace(input[j+1])){
+								state = NORMAL;
+							}
+							else {
+								token_builder[token_builder_len] = '\0';
+								if (*len >= *size){
+									//realloc
+								}
+								input_tok[(*len)] = strdup(token_builder);
+								token_builder_len = 0;
+								memset(token_builder, 0, INPUT_BUFFER_SIZE);
+								(*len)++;
+								state = NORMAL;
+							}
+						}
+						else if (c == '\\'){
+							mode = ON;
+						}
+						else{
+							token_builder[token_builder_len] = c;
+							token_builder_len++;
+						}
+					break;
 				}
-				else{
-					token_builder[token_builder_len] = c;
-					token_builder_len++;
-				}
-				break;
+					 	
+				
+
+			break;
 		}
 		
 		j++;

@@ -3,6 +3,9 @@
 
 #define CMD_CNT 4
 #define INPUT_BUFFER_SIZE 4096
+#define ESCAPE_CHARS_LEN 4
+
+extern const char double_quotes_escape_chars[ESCAPE_CHARS_LEN];
 
 typedef enum {
 	NORMAL,
