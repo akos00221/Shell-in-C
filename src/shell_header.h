@@ -9,6 +9,10 @@ typedef enum {
 	SINGLE_QUOTE,
 	DOUBLE_QUOTE
 }parse_states;
+typedef enum {
+	OFF,
+	ON
+}escape_mode;
 
 typedef void (*command_function)(char**, int);
 typedef struct {

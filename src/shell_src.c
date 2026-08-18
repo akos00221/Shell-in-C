@@ -123,34 +123,48 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 	char c;
 	char token_builder[INPUT_BUFFER_SIZE] = {0};
 	parse_states state = NORMAL;
+	escape_mode mode = OFF;
 	int j = 0, token_builder_len = 0;
 	*len = 0;
 	while ((c = input[j]) && c != '\0'){
 		
 		switch (state){
 			case NORMAL:
-				if (isspace(c)){
-					if (token_builder_len != 0){
-						token_builder[token_builder_len] = '\0';
-						if (*len >= *size){
-							//realloc
+				switch (mode){
+					
+					case OFF:
+						if (isspace(c)){
+							if (token_builder_len != 0){
+								token_builder[token_builder_len] = '\0';
+								if (*len >= *size){
+									//realloc
+								}
+								input_tok[*len] = strdup(token_builder);
+								//printf("%s\n", input_tok[*len]);
+								token_builder_len = 0;
+								memset(token_builder, 0, INPUT_BUFFER_SIZE);
+								(*len)++;
+							}
 						}
-						input_tok[*len] = strdup(token_builder);
-						//printf("%s\n", input_tok[*len]);
-						token_builder_len = 0;
-						memset(token_builder, 0, INPUT_BUFFER_SIZE);
-						(*len)++;
-					}
-				}
-				else if (c == '\''){
-					state = SINGLE_QUOTE;
-				}
-				else if (c == '\"'){
-					state = DOUBLE_QUOTE;
-				}
-				else{
-					token_builder[token_builder_len] = c;
-					token_builder_len++;
+						else if (c == '\\'){
+							mode = ON;
+						}
+						else if (c == '\''){
+							state = SINGLE_QUOTE;
+						}
+						else if (c == '\"'){
+							state = DOUBLE_QUOTE;
+						}
+						else{
+							token_builder[token_builder_len] = c;
+							token_builder_len++;
+						}
+					break;
+					case ON:
+						token_builder[token_builder_len] = c;
+						token_builder_len++;					
+						mode = OFF;
+					break;
 				}
 				break;
 			case SINGLE_QUOTE:
