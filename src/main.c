@@ -5,14 +5,16 @@
 
 int main(int argc, char *argv[]){
 	setbuf(stdout, NULL);
-	char *input = malloc(INPUT_BUFFER_SIZE);
+	//char *input = malloc(INPUT_BUFFER_SIZE);
+	char input[INPUT_BUFFER_SIZE];
 	while (1){
 		printf("$ ");
-		
+		/*
 		if (input == NULL){
 		    printf("Memory allocation error.\n");
 		    return 1;
 		}
+		*/
 		fgets(input, INPUT_BUFFER_SIZE-1, stdin);
 		input[strcspn(input, "\n")] = '\0';
 
@@ -64,7 +66,10 @@ int main(int argc, char *argv[]){
 		else{
 			commands[ind].func(input_tok, input_tok_len);
 		}
-
+		for (int i = 0; i < input_tok_len; ++i){
+			free(input_tok[i]);
+		}
+		free(input_tok);
 		//(ind == -1) ? printf("%s: command not found\n", input_tok[0]) : commands[ind].func(input_tok, input_tok_len);
 		
 	}

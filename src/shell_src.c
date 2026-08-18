@@ -29,6 +29,9 @@ int search_cmd(char *key){
 }
 
 void exit_shell(char **argv, int len){
+	for (int i = 0; i < len; ++i){
+		free(argv[i]);
+	}
 	free(argv);
 	exit(EXIT_SUCCESS);
 }
@@ -118,7 +121,7 @@ int launch_exec(char **argv, int len){
 }
 void parse_input(char *input, char **input_tok, int *size, int *len){
 	char c;
-	char token_builder[INPUT_BUFFER_SIZE];
+	char token_builder[INPUT_BUFFER_SIZE] = {0};
 	parse_states state = NORMAL;
 	int j = 0, token_builder_len = 0;
 	*len = 0;
@@ -183,6 +186,7 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 		
 		j++;
 	}
+	token_builder[token_builder_len] = '\0';
 	input_tok[(*len)] = strdup(token_builder);
 	token_builder_len = 0;
 	memset(token_builder, 0, INPUT_BUFFER_SIZE);
