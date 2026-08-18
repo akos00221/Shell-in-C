@@ -154,13 +154,10 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 				}
 				break;
 			case SINGLE_QUOTE:
-				//printf("%c\n", c);
 				if (c == '\''){
-					//printf("%d\n", token_builder_len);
 					if (input[j+1] == '\'' || input[j-1] == '\''){
 						state = NORMAL;
 					}
-					//printf("%c %c\n", input[j], input[j+1]);
 					else {
 						token_builder[token_builder_len] = '\0';
 						if (*len >= *size){
@@ -172,8 +169,6 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 						(*len)++;
 						state = NORMAL;
 					}
-
-
 				}
 				else{
 					token_builder[token_builder_len] = c;
@@ -181,6 +176,26 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 				}
 				break;
 			case DOUBLE_QUOTE:
+				if (c == '\"'){
+					if (input[j+1] == '\"' || input[j-1] == '\"' || !isspace(input[j+1])){
+						state = NORMAL;
+					}
+					else {
+						token_builder[token_builder_len] = '\0';
+						if (*len >= *size){
+							//realloc
+						}
+						input_tok[(*len)] = strdup(token_builder);
+						token_builder_len = 0;
+						memset(token_builder, 0, INPUT_BUFFER_SIZE);
+						(*len)++;
+						state = NORMAL;
+					}
+				}
+				else{
+					token_builder[token_builder_len] = c;
+					token_builder_len++;
+				}
 				break;
 		}
 		
