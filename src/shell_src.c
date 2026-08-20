@@ -4,16 +4,19 @@
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <unistd.h>
 #include <sys/wait.h>
 #include <ctype.h>
 
-const char double_quotes_escape_chars[ESCAPE_CHARS_LEN] = {'\\','\"','$','`'};
+//const char double_quotes_escape_chars[ESCAPE_CHARS_LEN] = {'\\','\"','$','`'};
+
+static const unsigned char char_lookup[256] = {
+	[' '] = 1, ['\t'] = 1, ['\n'] = 1,
+	['\\'] = 2, ['\"'] = 2, ['$'] = 2, ['`'] = 2
+};
 
 const builtin_command commands[CMD_CNT] = {
 	{&(echo), "echo"},
 	{&(exit_shell),"exit"},
-	{&(redirect_stdout), ">"},
 	{&(type), "type"}
 	
 };
@@ -38,7 +41,7 @@ void exit_shell(char **argv, int len){
 	exit(EXIT_SUCCESS);
 }
 void echo(char **argv, int len){
-	for (int i = 1; i < len; ++i){
+	for (int i = 1; i < len && argv[i] != NULL; ++i){
 		printf("%s ", argv[i]);
 	}
 	printf("\n");
@@ -121,53 +124,54 @@ int launch_exec(char **argv, int len){
 	}
 		
 }
-void parse_input(char *input, char **input_tok, int *size, int *len){
+static void create_token(char ***input_tok, int *size, int *len, char token_buffer[], int *token_buffer_len){
+	token_buffer[*token_buffer_len] = '\0';
+	if (*len >= *size){
+		char **temp = realloc(*input_tok, (*size)*2*sizeof(char*));
+		if (temp == NULL){
+			fprintf(stderr, "Memory allocation error.\n");
+			return;
+		}
+		(*size) *= 2;
+		(*input_tok) = temp;
+	}
+	(*input_tok)[*len] = strdup(token_buffer);
+	*token_buffer_len = 0;
+	(*len)++;
+}
+void parse_input(char *input, char ***input_tok, int *size, int *len){
 	char c;
-	char token_builder[INPUT_BUFFER_SIZE] = {0};
+	char token_buffer[INPUT_BUFFER_SIZE] = {0};
 	parse_states state = NORMAL;
-	escape_mode mode = OFF;
-	int j = 0, token_builder_len = 0;
+	int j = 0, token_buffer_len = 0;
 	*len = 0;
-	while ((c = input[j]) && c != '\0'){
+	while ((c = input[j]) != '\0'){
 		
 		switch (state){
 			case NORMAL:
-				switch (mode){
-					
-					case OFF:
-						if (isspace(c)){
-							if (token_builder_len != 0){
-								token_builder[token_builder_len] = '\0';
-								if (*len >= *size){
-									//realloc
-								}
-								input_tok[*len] = strdup(token_builder);
-								//printf("%s\n", input_tok[*len]);
-								token_builder_len = 0;
-								memset(token_builder, 0, INPUT_BUFFER_SIZE);
-								(*len)++;
-							}
-						}
-						else if (c == '\\'){
-							mode = ON;
-						}
-						else if (c == '\''){
-							state = SINGLE_QUOTE;
-						}
-						else if (c == '\"'){
-							state = DOUBLE_QUOTE;
-						}
-						else{
-							token_builder[token_builder_len] = c;
-							token_builder_len++;
-						}
-					break;
-					case ON:
-						token_builder[token_builder_len] = c;
-						token_builder_len++;					
-						mode = OFF;
-					break;
+	
+				if (char_lookup[(unsigned char)c] & 1){
+					if (token_buffer_len != 0){
+						create_token(input_tok, size, len, token_buffer, &token_buffer_len);
+					}
 				}
+				else if (c == '\\'){
+					state = NORMAL_ESC;
+				}
+				else if (c == '\''){
+					state = SINGLE_QUOTE;
+				}
+				else if (c == '\"'){
+					state = DOUBLE_QUOTE;
+				}
+				else{
+					token_buffer[token_buffer_len++] = c;
+				}
+
+			break;
+			case NORMAL_ESC:
+				token_buffer[token_buffer_len++] = c;
+				state = NORMAL;
 			break;
 			case SINGLE_QUOTE:
 				if (c == '\''){
@@ -175,81 +179,52 @@ void parse_input(char *input, char **input_tok, int *size, int *len){
 						state = NORMAL;
 					}
 					else {
-						token_builder[token_builder_len] = '\0';
-						if (*len >= *size){
-							//realloc
-						}
-						input_tok[(*len)] = strdup(token_builder);
-						token_builder_len = 0;
-						memset(token_builder, 0, INPUT_BUFFER_SIZE);
-						(*len)++;
+						create_token(input_tok, size, len, token_buffer, &token_buffer_len);
 						state = NORMAL;
 					}
 				}
 				else{
-					token_builder[token_builder_len] = c;
-					token_builder_len++;
+					token_buffer[token_buffer_len] = c;
+					token_buffer_len++;
 				}
 			break;
 			case DOUBLE_QUOTE:
-				switch (mode){
-					case ON:
-						for (int i = 0; i < ESCAPE_CHARS_LEN; ++i){
-							if (c == double_quotes_escape_chars[i]){
-								token_builder[token_builder_len] = c;
-								token_builder_len++;
-								break;
-							}
-						}
 
-						mode = OFF;
-					break;
-					case OFF:
-						if (c == '\"'){
-							if (input[j+1] == '\"' || input[j-1] == '\"' || !isspace(input[j+1])){
-								state = NORMAL;
-							}
-							else {
-								token_builder[token_builder_len] = '\0';
-								if (*len >= *size){
-									//realloc
-								}
-								input_tok[(*len)] = strdup(token_builder);
-								token_builder_len = 0;
-								memset(token_builder, 0, INPUT_BUFFER_SIZE);
-								(*len)++;
-								state = NORMAL;
-							}
-						}
-						else if (c == '\\'){
-							mode = ON;
-						}
-						else{
-							token_builder[token_builder_len] = c;
-							token_builder_len++;
-						}
-					break;
+				if (c == '\"'){
+					if (input[j+1] == '\"' || input[j-1] == '\"' || !isspace(input[j+1])){
+						state = NORMAL;
+					}
+					else {
+						create_token(input_tok, size, len, token_buffer, &token_buffer_len);
+						state = NORMAL;
+					}
 				}
-					 	
-				
+				else if (c == '\\'){
+					state = DOUBLE_QUOTE_ESC;
+				}
+				else{
+					token_buffer[token_buffer_len++] = c;
+				}
 
+			break;
+			case DOUBLE_QUOTE_ESC:
+				if (char_lookup[(unsigned char)c] > 0){
+					token_buffer[token_buffer_len++] = c;
+				}
+				state = DOUBLE_QUOTE;
 			break;
 		}
 		
 		j++;
 	}
-	if (token_builder_len > 0){
-		token_builder[token_builder_len] = '\0';
-		input_tok[(*len)] = strdup(token_builder);
-		token_builder_len = 0;
-		memset(token_builder, 0, INPUT_BUFFER_SIZE);
-		(*len)++;
+	if (token_buffer_len > 0){
+		create_token(input_tok, size, len, token_buffer, &token_buffer_len);
 	}
 
 }
-void redirect_stdout(char **argv, int len){}
+void redirect_stdout(char **argv, int len){
 
-
+}
 
 /*
 		DIR *dir = opendir(token);
@@ -266,3 +241,4 @@ void redirect_stdout(char **argv, int len){}
 			closedir(dir);
 		}
 */
+

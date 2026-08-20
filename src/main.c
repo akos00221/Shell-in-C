@@ -4,7 +4,8 @@
 #include "shell_header.h"
 
 int main(int argc, char *argv[]){
-	setbuf(stdout, NULL);
+	
+    setvbuf(stdout, NULL, _IONBF, 0);
 	char input[INPUT_BUFFER_SIZE];
 	while (1){
 		printf("$ ");
@@ -18,7 +19,7 @@ int main(int argc, char *argv[]){
 		if (input_tok == NULL){
 			return 1;
 		}
-		parse_input(input, input_tok, &params, &input_tok_len);
+		parse_input(input, &input_tok, &params, &input_tok_len);
 
 		if (input_tok_len < params){
 			input_tok[input_tok_len] = NULL;
@@ -28,6 +29,44 @@ int main(int argc, char *argv[]){
         //}
 		//printf("%s\n", command);
 		int ind = search_cmd(input_tok[0]);
+        for (int i = 0; i < input_tok_len; ++i){
+            if (!strcmp(">", input_tok[i]) || !strcmp("1>", input_tok[i])){
+                input_tok[i] = NULL;
+                int fd = open(input_tok[i+1], O_WRONLY | O_CREAT);
+                if (fd == -1){
+                    //bruh
+                }
+                int backup = dup(STDOUT_FILENO);
+                dup2(fd, STDOUT_FILENO);
+                close(fd);
+				// run prog
+				if (ind == -1){
+					if (launch_exec(input_tok, input_tok_len) == -1){
+						printf("%s: not found\n", input_tok[0]);
+					}
+
+				}
+				else{
+					commands[ind].func(input_tok, input_tok_len);
+				}
+				for (int i = 0; i < input_tok_len; ++i){
+					free(input_tok[i]);
+				}
+                dup2(backup, STDOUT_FILENO);
+                close(backup);
+				return 0;
+            }
+            else if (!strcmp("2>", input_tok[i])){
+
+            }
+            else if (!strcmp(">>", input_tok[i])){
+
+            }
+            else if (!strcmp("2>>", input_tok[i])){
+
+            }
+        }
+		
 		if (ind == -1){
 			if (launch_exec(input_tok, input_tok_len) == -1){
 				printf("%s: not found\n", input_tok[0]);
