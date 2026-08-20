@@ -8,6 +8,7 @@ int main(int argc, char *argv[]){
     setvbuf(stdout, NULL, _IONBF, 0);
 	char input[INPUT_BUFFER_SIZE];
 	while (1){
+		
 		printf("$ ");
 		fgets(input, INPUT_BUFFER_SIZE-1, stdin);
 		input[strcspn(input, "\n")] = '\0';
@@ -28,6 +29,7 @@ int main(int argc, char *argv[]){
         //    printf("%s %d\n", input_tok[i], strlen(input_tok[i]));
         //}
 		//printf("%s\n", command);
+		int flag = 0;
 		int ind = search_cmd(input_tok[0]);
         for (int i = 0; i < input_tok_len; ++i){
             if (!strcmp(">", input_tok[i]) || !strcmp("1>", input_tok[i])){
@@ -54,7 +56,7 @@ int main(int argc, char *argv[]){
 				}
                 dup2(backup, STDOUT_FILENO);
                 close(backup);
-				continue;
+				flag = 1;
             }
             else if (!strcmp("2>", input_tok[i])){
 
@@ -66,19 +68,21 @@ int main(int argc, char *argv[]){
 
             }
         }
-		
-		if (ind == -1){
-			if (launch_exec(input_tok, input_tok_len) == -1){
-				printf("%s: not found\n", input_tok[0]);
-			}
+		if (flag == 0){
+			if (ind == -1){
+				if (launch_exec(input_tok, input_tok_len) == -1){
+					printf("%s: not found\n", input_tok[0]);
+				}
 
+			}
+			else{
+				commands[ind].func(input_tok, input_tok_len);
+			}
+			for (int i = 0; i < input_tok_len; ++i){
+				free(input_tok[i]);
+			}
 		}
-		else{
-			commands[ind].func(input_tok, input_tok_len);
-		}
-		for (int i = 0; i < input_tok_len; ++i){
-			free(input_tok[i]);
-		}
+
 		free(input_tok);
 		
 	}
