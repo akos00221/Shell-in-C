@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
 				}
                 dup2(backup, STDOUT_FILENO);
                 close(backup);
-				return 0;
+				continue;
             }
             else if (!strcmp("2>", input_tok[i])){
 
