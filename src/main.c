@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
         for (int i = 0; i < input_tok_len; ++i){
             if (!strcmp(">", input_tok[i]) || !strcmp("1>", input_tok[i])){
                 input_tok[i] = NULL;
-                int fd = open(input_tok[i+1], O_WRONLY | O_CREAT | O_TRUNC);
+                int fd = open(input_tok[i+1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (fd == -1){
                     //bruh
                 }
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
             }
             else if (!strcmp("2>", input_tok[i])){
                 input_tok[i] = NULL;
-                int fd = open(input_tok[i+1], O_WRONLY | O_CREAT | O_TRUNC);
+                int fd = open(input_tok[i+1],  O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (fd == -1){
                     //bruh
                 }
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
             }
             else if (!strcmp(">>", input_tok[i]) || !strcmp("1>>", input_tok[i])){
                 input_tok[i] = NULL;
-                int fd = open(input_tok[i+1], O_APPEND | O_CREAT);
+				int fd = open(input_tok[i+1], O_APPEND | O_CREAT | O_WRONLY, 0644);
                 if (fd == -1){
                     //bruh
                 }
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]){
             }
             else if (!strcmp("2>>", input_tok[i])){
                 input_tok[i] = NULL;
-                int fd = open(input_tok[i+1],  O_APPEND | O_CREAT);
+                int fd = open(input_tok[i+1],  O_APPEND | O_CREAT | O_WRONLY, 0644);
                 if (fd == -1){
                     //bruh
                 }
