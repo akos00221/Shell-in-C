@@ -59,7 +59,30 @@ int main(int argc, char *argv[]){
 				flag = 1;
             }
             else if (!strcmp("2>", input_tok[i])){
+                input_tok[i] = NULL;
+                int fd = open(input_tok[i+1], O_WRONLY | O_CREAT);
+                if (fd == -1){
+                    //bruh
+                }
+                int backup = dup(STDERR_FILENO);
+                dup2(fd, STDERR_FILENO);
+                close(fd);
+				// run prog
+				if (ind == -1){
+					if (launch_exec(input_tok, input_tok_len) == -1){
+						printf("%s: not found\n", input_tok[0]);
+					}
 
+				}
+				else{
+					commands[ind].func(input_tok, input_tok_len);
+				}
+				for (int i = 0; i < input_tok_len; ++i){
+					free(input_tok[i]);
+				}
+                dup2(backup, STDERR_FILENO);
+                close(backup);
+				flag = 1;
             }
             else if (!strcmp(">>", input_tok[i])){
 
